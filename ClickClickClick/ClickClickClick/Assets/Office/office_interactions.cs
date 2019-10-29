@@ -7,6 +7,8 @@ using UnityEngine.SceneManagement;
 public class office_interactions : MonoBehaviour
 {
     public PopUp popup;
+    public ChoiceMenu choicemenu;
+    public InventoryManager inventory;
     // scene variables
     public int ComputerIsOn = 0;
 
@@ -20,6 +22,7 @@ public class office_interactions : MonoBehaviour
 
     }
 
+
     public void GotoWindow()
     {
         SaveVars();
@@ -29,23 +32,63 @@ public class office_interactions : MonoBehaviour
     public void TurnOnComputer()
     {
         Debug.Log("click computer");
-        if (ComputerIsOn==1)
+        if (inventory.CurrentItem == "matches")
         {
-            GameObject.Find("screen").GetComponent<Image>().color = new Color(1, 1, 1, 0);
-            ComputerIsOn = 0;
+            popup.ShowPopUp("I'm not burning my computer");
         }
         else
         {
-            GameObject.Find("screen").GetComponent<Image>().color = new Color(1, 1, 1, 1);
-            ComputerIsOn = 1;
+            if (ComputerIsOn == 1)
+            {
+                GameObject.Find("screen").GetComponent<Image>().color = new Color(1, 1, 1, 0);
+                ComputerIsOn = 0;
+            }
+            else
+            {
+                GameObject.Find("screen").GetComponent<Image>().color = new Color(1, 1, 1, 1);
+                ComputerIsOn = 1;
+            }
         }
+
+
         
     }
     public void LookAtDrawings()
     {
-        popup.ShowPopUp("Des criss de beaux dessins");
+        Debug.Log("look at drawing");
+        StartCoroutine(LookAtDrawingsChoices());
+
+    }
+    IEnumerator LookAtDrawingsChoices()
+    {
+        List<string> choices = new List<string>();
+        choices.Add("lookat");
+        choices.Add("remove");
+        choicemenu.ShowChoices(choices);
+        Debug.Log("waiting for choices");
+        while (choicemenu.clicked == "")
+        {
+            yield return new WaitForSeconds(0.1f);
+        }
+        Debug.Log(choicemenu.clicked);
+        if (choicemenu.clicked == "lookat")
+        {
+            popup.ShowPopUp("des beaux dessins");
+        }
+        if (choicemenu.clicked == "remove")
+        {
+            popup.ShowPopUp("Je les enlève pas, calvaire.");
+        }
     }
 
+    public void ClickOnBags()
+    {
+        if (inventory.CurrentItem == "matches")
+        {
+            popup.ShowPopUp("I'll put the matches in the bag");
+            inventory.RemoveItem("matches");
+        }
+    }
     void SaveVars()
     {
         PlayerPrefs.SetInt("Office_ComputerIsOn", ComputerIsOn);
